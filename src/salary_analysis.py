@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+import numpy as np
 
 class SalaryPredictor:
     """
@@ -29,14 +30,13 @@ class SalaryPredictor:
         self.df['experience_rank'] = self.df['experience_level'].map(exp_map)
 
         #Job Title Grouping(5first top)
-        top_jobs = self.df['job_title'].value_counts().nlargest(5).tolist()
+        top_jobs = self.df['job_title'].value_counts().nlargest(5).index.tolist()
         self.df['job_group'] = self.df['job_title'].apply(lambda x: x if x in top_jobs else 'Other')
 
         #One-Hot Encoding
-        categorical_col = ['company_size', 'employment_type', 'remote_ratio', 'job_group']
-        self.df_encoded = pd.get_dummies(self.df, columns=categorical_col, drop_first=True)
+        categorical_cols = ['company_size', 'employment_type', 'remote_ratio', 'job_group']
+        self.df_encoded = pd.get_dummies(self.df, columns=categorical_cols, drop_first=True)
 
-        import numpy as np
         self.df_encoded['log_salary'] = np.log1p(self.df_encoded['salary_in_usd'])
 
         drop_cols = ['work_year', 'salary', 'salary_currency', 'salary_in_usd', 
