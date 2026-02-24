@@ -33,20 +33,20 @@ class SalaryRequest(BaseModel):
     employment_type: str   # FT, PT
     remote_ratio: int      # 0, 50, 100
 
-# 4. Expose Prediction Endpoint
+# Expose Prediction Endpoint
 @app.post("/predict")
 def predict_salary(data: SalaryRequest):
     if model is None:
         raise HTTPException(status_code=500, detail="ML Model is currently unavailable.")
 
-    # Step A: Create an empty dictionary mapping all trained features to 0
+    #Create an empty dictionary mapping all trained features to 0
     input_dict = {col: 0 for col in model_columns}
 
-    # Step B: Inject Ordinal Feature
+    # Inject Ordinal Feature
     exp_map = {"EN": 1, "MI": 2, "SE": 3, "EX": 4}
     input_dict["experience_rank"] = exp_map.get(data.experience_level, 2) # default MI
 
-    # Step C: Dynamic One-Hot Encoding Injector
+    # Dynamic One-Hot Encoding Injector
     def set_one_hot(prefix, value):
         exact_col = f"{prefix}_{value}"
         other_col = f"{prefix}_Other"
@@ -62,7 +62,7 @@ def predict_salary(data: SalaryRequest):
     set_one_hot("employment_type", data.employment_type)
     set_one_hot("remote_ratio", data.remote_ratio)
 
-    # Step D: Execute Prediction
+    #Execute Prediction
     df_input = pd.DataFrame([input_dict])
     log_pred = model.predict(df_input)[0]
     predicted_usd = np.expm1(log_pred)

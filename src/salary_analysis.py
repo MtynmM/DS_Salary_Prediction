@@ -38,7 +38,7 @@ class SalaryPredictor:
         if self.df is None:
             raise ValueError("data not loaded. Call load_csv() first.")
 
-        # 1. Ordinal Encoding
+        #Ordinal Encoding
         exp_map = {"EN": 1, "MI": 2, "SE": 3, "EX": 4}
         self.df["experience_rank"] = self.df["experience_level"].map(exp_map)
 
@@ -57,7 +57,7 @@ class SalaryPredictor:
         # Target Transformation
         self.df_encoded["log_salary"] = np.log1p(self.df_encoded["salary_in_usd"])
 
-        # 6. Cleanup
+        #Cleanup
         drop_cols = ["work_year", "salary", "salary_currency", "salary_in_usd", 
                      "employee_residence", "company_location", "job_title", "experience_level"]
         self.final_df = self.df_encoded.drop(columns=[c for c in drop_cols if c in self.df_encoded.columns])
