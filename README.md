@@ -1,54 +1,49 @@
-🚀 Data Science Salary Prediction: End-to-End MLOps Pipeline
+🚀 AI Salary Predictor: Modular MVP Pipeline
 
-این پروژه یک راهکار جامع و عملیاتی (Production-Ready) برای تحلیل و پیش‌بینی حقوق متخصصان داده است. برخلاف مدل‌های آزمایشگاهی ساده، این سیستم یک پایپ‌لاین کامل از استخراج داده‌های خام تا استقرار در قالب یک وب‌سرویس مقیاس‌پذیر را شامل می‌شود.
+این پروژه یک سیستم End-to-End و ماژولار برای مهندسی داده، آموزش مدل‌های یادگیری ماشین و استقرار وب‌سرویس جهت پیش‌بینی حقوق متخصصان داده (Data Scientists, ML Engineers و ...) است. تمرکز اصلی این معماری، گذر از اسکریپت‌های یکپارچه (Monolithic Notebooks) به سمت یک نرم‌افزار مقیاس‌پذیر (Scalable Software) با رعایت اصول مهندسی نرم‌افزار می‌باشد.
 
 🏛️ معماری سیستم (System Architecture)
 
-پروژه با رویکرد Modular Monolith طراحی شده و از ایزوله‌سازی لایه‌های مختلف برای تضمین قابلیت نگهداری (Maintainability) استفاده می‌کند
+برای حفظ سادگی در توسعه و سهولت در استقرار، معماری Modular Monolith انتخاب شده است. لایه‌ها (Concerns) کاملاً از یکدیگر ایزوله شده‌اند (Decoupled) تا تغییر در دیتابیس یا مدل، نیازی به بازنویسی لایه API نداشته باشد.
 
-اجزای اصلی:
+📦 DS_Salary_Prediction
+ ┣ 📂 data/               # Persistence Layer (SQLite DB & Joblib Artifacts)
+ ┣ 📂 src/
+ ┃ ┣ 📂 data_pipeline/    # Data Engineering & ETL (SQLAlchemy)
+ ┃ ┣ 📂 models/           # ML Engine, Training & Evaluation
+ ┃ ┗ 📂 api/              # Serving Layer (FastAPI, Pydantic)
+ ┗ 📜 main.py             # Central Orchestrator
 
-لایه ETL: تبدیل داده‌های خام به فرمت استاندارد و مهندسی ویژگی‌ها (Feature Engineering).
 
-لایه پایداری (Persistence): استفاده از SQLAlchemy و SQLite برای ذخیره‌سازی داده‌های تمیز شده و آماده‌سازی جهت آموزش مدل.
+🧠 تصمیمات کلیدی معماری (Architecture Decisions)
 
-موتور یادگیری ماشین: پیاده‌سازی آزمون‌های متقاطع (K-Fold Cross Validation) جهت تضمین پایداری مدل.
+به عنوان مهندس نرم‌افزار، چالش‌های زیر با رویکردهای استاندارد صنعت برطرف شده‌اند:
 
-لایه استقرار: وب‌سرویس ناهمگام (Asynchronous) با استفاده از FastAPI.
+۱. اصل تزریق وابستگی (Dependency Injection) در API
 
-🧠 چالش‌های مهندسی و راهکارهای استراتژیک
+به جای هاردکد کردن (Hard-coding) مسیر مدل در API، شیء Predictor در زمان اجرا (Runtime) به تابع سازنده create_app تزریق می‌شود. این کار قابلیت تست‌پذیری (Testability) سیستم را در آینده برای نوشتن Mock Testها به شدت افزایش می‌دهد.
 
-در طول توسعه این پایپ‌لاین، با چالش‌های فنی روبرو شدیم که حل آن‌ها نیازمند درک عمیق از رفتار داده‌ها بود:
+۲. پایداری در محیط عملیاتی با مدیریت OOV
 
-۱. مقابله با نشت ترتیب داده (Data Leakage Prevention)
+یکی از دلایل اصلی شکست مدل‌های ML در محیط Production، دریافت داده‌های پیش‌بینی‌نشده (Out-of-Vocabulary) است. در لایه ETL، دیکشنریِ mappings.joblib ساخته می‌شود تا ورودی‌های ناشناس کاربر در محیط Inference با ظرافت (Gracefully) به ویژگی "Other" نگاشت شوند و از کرش کردن (500 Internal Server Error) جلوگیری شود.
 
-چالش: داده‌ها بر اساس زمان مرتب شده بودند. استفاده از تقسیم‌بندی ساده منجر به سوگیری (Bias) شدید مدل می‌شد.
+۳. اعتبارسنجی لبه سیستم (Edge Validation) با Pydantic
 
-راهکار: استفاده از K-Fold Shuffling. داده‌ها پیش از هر مرحله تقسیم‌بندی کاملاً بُر زده شدند تا تاثیر نوسانات اقتصادی سالانه بر تمام بخش‌های مدل توزیع شود.
+داده‌های ورودی کاربر غیرقابل اعتماد هستند. با استفاده از Schemaهای سخت‌گیرانه Pydantic در لایه روتر FastAPI، داده‌ها قبل از ورود به چرخه پیش‌بینی، اعتبارسنجی شده (Type Checking & Range Validation) و امنیت سیستم تضمین می‌گردد.
 
-۲. شناسایی ویژگی طلایی (The Golden Feature)
+۴. غلبه بر نفرین ابعاد (Curse of Dimensionality)
 
-چالش: تاثیر جغرافیا بر حقوق‌ها به شدت نویزدار بود (ده‌ها کشور با تکرار بسیار کم).
+در بنچمارک الگوریتم‌ها، مدل پیچیده‌تر (Random Forest) با خطای بالاتری نسبت به Linear Regression مواجه شد. به دلیل استفاده از One-Hot Encoding، داده‌ها تبدیل به ماتریس‌های خلوت (Sparse Matrices) شدند. رگرسیون خطی با اختصاص وزن مستقیم، اصل Occam's Razor را اثبات کرد و به عنوان Champion Model انتخاب شد.
 
-راهکار: پیاده‌سازی Geographical Normalization. با نگه داشتن ۴ قطب اصلی (مانند US و GB) و دسته‌بندی بقیه در گروه Other از ابعاد کاذب مدل کاسته شد و قدرت پیش‌بینی به شکل معناداری افزایش یافت.
+📊 نتایج بنچمارک (A/B Testing - 5-Fold CV)
 
-۳. پارادوکس مدل‌های پیچیده (Occam's Razor in ML)
+Algorithm
 
-چالش: در کمال تعجب، مدل Random Forest در مقابل Linear Regression شکست خورد!
+Mean R² Score
 
-تحلیل: به دلیل استفاده از One-Hot Encoding، ما با یک ماتریس خلوت (Sparse Matrix) روبرو بودیم. رگرسیون خطی با اختصاص وزن‌های مستقیم به ستون‌های باینری، بسیار دقیق‌تر از مدل‌های مبتنی بر درخت (که در تقسیم‌بندی‌های عمیق روی داده‌های خلوت دچار ضعف می‌شوند) عمل کرد.
+RMSE (USD)
 
-📊 نتایج بنچمارک مدل‌ها
-
-ما دو رویکرد متفاوت را در یک شرایط کاملاً یکسان (5-Fold CV) با هم مقایسه کردیم:
-
-الگوریتم
-
-میانگین R2 Score
-
-میانگین RMSE (USD)
-
-وضعیت نهایی
+Status
 
 Linear Regression
 
@@ -56,7 +51,7 @@ Linear Regression
 
 $52,532
 
-🏆 Champion (Selected)
+🏆 Champion (Deployed)
 
 Random Forest
 
@@ -68,38 +63,39 @@ Baseline
 
 🛠️ پشته تکنولوژی (Tech Stack)
 
-Backend: FastAPI, Pydantic, Uvicorn
+Serving & API: FastAPI, Uvicorn, Pydantic
 
-Data & ML: Pandas, NumPy, Scikit-Learn
+Machine Learning: Scikit-Learn, NumPy, Joblib (Optimized Serialization)
 
-Database: SQLite, SQLAlchemy
+Data Persistence: Pandas, SQLAlchemy, SQLite
 
-Serialization: Pickle (Model Versioning)
+Design Patterns: Dependency Injection, Orchestrator, Factory Pattern
 
-🚀 راهنمای نصب و اجرا
+🚀 راهنمای نصب و اجرا (Quick Start)
 
-۱. نصب کتابخانه‌ها:
+۱. نصب نیازمندی‌ها:
 
 pip install -r requirements.txt
 
 
-۲. اجرای پایپ‌لاین آموزش:
-این دستور دیتابیس را ساخته و مدل را در پوشه data تولید می‌کند:
+۲. اجرای ارکستراتور (ETL + Training + Serving):
+با اجرای دستور زیر، سیستم به طور خودکار پایپ‌لاین را در صورت عدم وجود Artifactها ران کرده و سرور را در localhost:8000 بالا می‌آورد:
 
-python src/salary_analysis.py
-
-
-۳. راه‌اندازی سرور پیش‌بینی:
-
-uvicorn src.main:app --reload
+python main.py
 
 
-سپس به آدرس http://127.0.0.1:8000/docs بروید تا از پنل Swagger استفاده کنید.
+👉 رابط کاربری تعاملی (Swagger): http://127.0.0.1:8000/docs
 
-📈 نقشه راه آینده (Roadmap)
+🛣️ نقشه راه توسعه (Roadmap to MLOps Level 1)
 
-[ ] پیاده‌سازی کانتینر Docker برای استقرار ایزوله.
+برای ارتقای این MVP به یک پلتفرم کاملاً بالغ، موارد زیر در دستور کار قرار دارند:
 
-[ ] استفاده از MLflow برای ردیابی آزمایش‌ها (Experiment Tracking).
+[ ] کانتینرسازی محیط با Docker و docker-compose.
 
-[ ] طراحی داشبورد بصری با Streamlit برای کاربران غیرفنی.
+[ ] پیاده‌سازی تست‌های خودکار (Unit/Integration Tests) با Pytest.
+
+[ ] اضافه کردن MLflow برای Model Registry و Experiment Tracking.
+
+[ ] راه‌اندازی CI/CD Pipeline با GitHub Actions.
+
+توسعه‌دهنده: متین محمدی - مهندس نرم‌افزار
