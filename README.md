@@ -6,14 +6,15 @@
 
 برای حفظ سادگی در توسعه و سهولت در استقرار، معماری Modular Monolith انتخاب شده است. لایه‌ها (Concerns) کاملاً از یکدیگر ایزوله شده‌اند (Decoupled) تا تغییر در دیتابیس یا مدل، نیازی به بازنویسی لایه API نداشته باشد.
 
+```text
 📦 DS_Salary_Prediction
- ┣ 📂 data/               # Persistence Layer (SQLite DB & Joblib Artifacts)
- ┣ 📂 src/
- ┃ ┣ 📂 data_pipeline/    # Data Engineering & ETL (SQLAlchemy)
- ┃ ┣ 📂 models/           # ML Engine, Training & Evaluation
- ┃ ┗ 📂 api/              # Serving Layer (FastAPI, Pydantic)
- ┗ 📜 main.py             # Central Orchestrator
-
+┣ 📂 data/               # Persistence Layer (SQLite DB & Joblib Artifacts)
+┣ 📂 src/
+┃ ┣ 📂 data_pipeline/    # Data Engineering & ETL (SQLAlchemy)
+┃ ┣ 📂 models/           # ML Engine, Training & Evaluation
+┃ ┗ 📂 api/              # Serving Layer (FastAPI, Pydantic)
+┗ 📜 main.py             # Central Orchestrator
+```
 
 🧠 تصمیمات کلیدی معماری (Architecture Decisions)
 
@@ -75,14 +76,16 @@ Design Patterns: Dependency Injection, Orchestrator, Factory Pattern
 
 ۱. نصب نیازمندی‌ها:
 
+```bash
 pip install -r requirements.txt
-
+```
 
 ۲. اجرای ارکستراتور (ETL + Training + Serving):
 با اجرای دستور زیر، سیستم به طور خودکار پایپ‌لاین را در صورت عدم وجود Artifactها ران کرده و سرور را در localhost:8000 بالا می‌آورد:
 
+```bash
 python main.py
-
+```
 
 👉 رابط کاربری تعاملی (Swagger): http://127.0.0.1:8000/docs
 
